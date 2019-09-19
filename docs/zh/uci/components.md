@@ -19,7 +19,7 @@
 ### 事件
 | 事件名称   | 说明         | 回调参数   |
 |---------- |------------- |---------- |
-| apply     | 应用配置时触发 | — |
+| applied     | 当应用配置完成时触发 | — |
 
 ## uci-section
 
@@ -149,17 +149,24 @@ export default {
 | label       | 标签 | string | — | — |
 | name        | 名称 | string | — | — |
 | uci-option  | uci选项名称(如果提供该属性，则不再以name属性作为uci选项名称) | string | — | — |
-| description | 对该选项的一个简短描述 | string | — | — |
+| description | 对该选项的一个简短描述(支持渲染HTML) | string | — | — |
 | required    | 是否必填 | boolean | — | false |
 | initial     | 初始值 | string/number | — | — |
 | depend      | 依赖 | string | — | — |
 | rules       | 表单验证规则 | string/object/Function(value) | — | — |
 | load        | 自定义加载方式 | string/array/Function(sid, self) | — | — |
-| save        | 自定义保存函数 | string/Function(sid, value, self) | — | — |
+| save        | 自定义保存函数或者值(如果提供一个空字符串，表示不保存) | string/array/Function(sid, value, self) | — | — |
 | apply       | 表单提交时的钩子函数 | Function(value, self) | — | — |
 | tab         | 明确指定该选项所属的Tab面板 | string | — | — |
 | header      | 自定义表格的列标题 | string | — | — |
 | width       | 表格的列宽度 | string/number | — | — |
+| hide        | 不显示 | boolean | — | — |
+
+### 事件
+| 事件名称   | 说明         | 回调参数   |
+|---------- |------------- |---------- |
+| applied   | 当应用配置完成时触发 | 该选项的当前值 |
+| change    | 当选项的值改变时触发 | value, sid, self |
 
 ### 作用域插槽
 | 名称 | 说明     |
@@ -205,6 +212,18 @@ export default {
 等价于
 ``` vue
 <uci-option-dummy label="名称" name="name"></uci-option-dummy>
+```
+
+``` vue
+<uci-option label="名称" name="name">
+  <template v-slot="props">
+    <el-input v-model="props.self.form[props.prop]"></el-input>
+  </template>
+</uci-option>
+```
+等价于
+``` vue
+<uci-option-input label="名称" name="name"></uci-option-input>
 ```
 
 ## uci-option-dummy
@@ -268,3 +287,7 @@ export default {
 |------------ |------------ |---------- |-------------|-------- |
 | initial | 初始值 | array | — | — |
 | suggestions | 输入建议选项 | array | — | — |
+
+## uci-option-file
+
+类似输入框，但是支持选择文件。

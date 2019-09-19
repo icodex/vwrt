@@ -28,7 +28,7 @@ export default {
     },
     tabbed: Boolean,
     afterLoaded: Function,
-    applyTimeout: Number
+    applyTimeout: Number /* timeout for apply(second) */
   },
   components: {
     UciFormBody
@@ -133,9 +133,14 @@ export default {
           Promise.all(promises).then(() => {
             this.load().then(() => {
               this.reset();
-              this.$emit('apply');
               loading.close();
               this.$message.success(this.$t('Configuration has been applied'));
+
+              this.$emit('applied');
+
+              this.sections.forEach(s => {
+                s.applied();
+              });
             });
           });
         });

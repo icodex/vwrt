@@ -16,21 +16,7 @@ export default {
       return this.option.formProp(this.sid);
     },
     visible() {
-      const depend = this.option.parsedDepend;
-      if (!depend)
-        return true;
-
-      let expr = depend.expr;
-
-      depend.names.forEach(name => {
-        const o = this.option.uciSection.children[name];
-        if (!o)
-          return false;
-        let v = o.dependExprValue(this.sid);
-        expr = expr.replace(new RegExp(name, 'gm'), v);
-      });
-
-      return eval(expr);
+      return !this.option.hide && this.option.visible(this.sid);
     }
   },
   watch: {
@@ -56,7 +42,8 @@ export default {
             {this.label}
             {
               this.option.description &&
-              <el-tooltip content={this.option.description} placement="top">
+              <el-tooltip placement="top">
+                <div slot="content" domPropsInnerHTML={this.option.description} />
                 <i class="iconfont iconhelp" style="color: #3980DE" />
               </el-tooltip>
             }

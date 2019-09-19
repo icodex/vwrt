@@ -24,11 +24,12 @@ export default {
     load: [String, Array, Function],
     /*
     ** If a function provided, it will be called when oui saves the uci configuration.
-    ** If any other value provided, indicates don't save uci.
+    ** If an empty string provided, indicates don't save uci.
+    ** If any other value provided, indicates save uci with the value.
     ** Parameters: sid, value, self
     ** Return:  Promise object or undefined
     */
-    save: [String, Function],
+    save: [String, Array, Function],
     /*
     ** If this function is provided, it will be called when oui applys the uci configuration.
     ** Parameters: value, self
@@ -46,7 +47,8 @@ export default {
     /* Used for custom header of table column */
     header: String,
     /* Used for table section */
-    width: [String, Number]
+    width: [String, Number],
+    hide: Boolean
   },
   data() {
     return {
@@ -240,6 +242,23 @@ export default {
       const v = this.formValue(sid);
       return `'${v}'`;
     },
+    visible(sid) {
+      const depend = this.parsedDepend;
+      if (!depend)
+        return true;
+
+      let expr = depend.expr;
+
+      depend.names.forEach(name => {
+        const o = this.uciSection.children[name];
+        if (!o)
+          return false;
+        let v = o.dependExprValue(sid);
+        expr = expr.replace(new RegExp(name, 'gm'), v);
+      });
+
+      return eval(expr);
+    },
     buildFormRule() {
       const rules = [];
 
@@ -329,16 +348,21 @@ export default {
       return value;
     },
     _save(sid) {
+      if (this.save === '')
+        return;
+
       let value = this.formValue(sid);
+      if (typeof(this.save) !== 'undefined' && typeof(this.save) !== 'function')
+        value = this.save;
+
+      if (!this.visible(sid))
+        value = this.convertFromUCI(this.initial);
 
       if (window.oui.isEqual(value, this.original[sid]))
         return;
 
-      if (typeof(this.save) !== 'undefined') {
-        if (typeof(this.save) === 'function')
-          return this.save(sid, value, this);
-        return;
-      }
+      if (typeof(this.save) === 'function')
+        return this.save(sid, value, this);
 
       this.$uci.set(this.config, sid, this.uciopt, this.convertToUCI(value));
     },
@@ -350,6 +374,9 @@ export default {
 
       if (typeof(this.apply) !== 'undefined')
         return this.apply(value, this);
+    },
+    applied(sid) {
+      this.$emit('applied', this.formValue(sid));
     },
     view(prop, sid) {
       if (this.$scopedSlots.default)

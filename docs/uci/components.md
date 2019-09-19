@@ -19,7 +19,7 @@ Represents a uci configuration file. Other components must be wrapped by this co
 ### Events
 | Name   | Description         | Parameters   |
 |---------- |------------- |---------- |
-| apply     | triggers when applying configuration | — |
+| applied   | triggers when apply configuration complete | — |
 
 ## uci-section
 
@@ -147,17 +147,24 @@ All properties of the `uci-option` component are inherited by other `uci-option-
 | label       | label | string | — | — |
 | name        | option name (under the same section, must be unique) | string | — | — |
 | uci-option  | Uci option name (if this attribute is provided, the name attribute is no longer used as the uci option name) | string | — | — |
-| description | a short description of the option | string | — | — |
+| description | a short description of the option(Support for HTML rendering) | string | — | — |
 | required    | Required or not | boolean | — | false |
 | initial     | initial value | string/number | — | — |
 | depend      | depend | string | — | — |
 | rules       | form validation rule | string/object/Function(value) | — | — |
 | load        | Custom loading method | string/array/Function(sid, self) | — | — |
-| save        | Custom save function | string/Function(sid, value, self) | — | — |
+| save        | Custom save function or value(If an empty string provided, indicates don't save uci) | string/array/Function(sid, value, self) | — | — |
 | apply       | hook function when submitting a form | Function(value, self) | — | — |
 | tab         | Specify the tab panel to which this option belongs | string | — | — |
 | header      | Custom table column header | string | — | — |
 | width       | Column width of the table | string/number | — | — |
+| hide        | Do not show | boolean | — | — |
+
+### Events
+| Name   | Description         | Parameters   |
+|---------- |------------- |---------- |
+| applied   | triggers when apply configuration complete | The current value of this option |
+| change    | triggers when the option's value changed | value, sid, self |
 
 ### Scoped Slots
 | Name | Description     |
@@ -205,6 +212,18 @@ If a function is provided, a Promise object can be returned for asynchronous sav
 Equivalent to
 ``` vue
 <uci-option-dummy label="名称" name="name"></uci-option-dummy>
+```
+
+``` vue
+<uci-option label="名称" name="name">
+  <template v-slot="props">
+    <el-input v-model="props.self.form[props.prop]"></el-input>
+  </template>
+</uci-option>
+```
+Equivalent to
+``` vue
+<uci-option-input label="名称" name="name"></uci-option-input>
 ```
 
 ## uci-option-dummy
@@ -268,3 +287,7 @@ Dynamic list. Corresponds to the list in the uci configuration.
 |------------ |------------ |---------- |-------------|-------- |
 | initial | initial value | array | — | — |
 | suggestions | recommended tips | array | — | — |
+
+## uci-option-file
+
+Similar to the input box, but support for select file.

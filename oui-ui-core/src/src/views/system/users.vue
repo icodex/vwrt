@@ -1,5 +1,5 @@
 <template>
-  <uci-form config="rpcd" @apply="onApply">
+  <uci-form config="rpcd" @applied="onApplied">
     <uci-section type="login" addable :teasers="['username', 'shadow']" :add="addUser">
       <uci-option-dummy :label="$t('Username')" name="username"></uci-option-dummy>
       <uci-option-switch :label="$t('Use the Linux system user password')" name="shadow" :load="isShadow" @change="shadowChanged" :save="saveShadow"></uci-option-switch>
@@ -8,17 +8,17 @@
         <template v-slot="{value}">
           <el-table :data="value || []" class="oui-acls-table">
             <el-table-column :label="$t('ACL Group')" prop="description"></el-table-column>
-            <el-table-column label="N" width="30">
+            <el-table-column :label="$t('N')" width="30">
               <template v-slot="{row}">
                 <el-radio v-model="row.acl" label="n"></el-radio>
               </template>
             </el-table-column>
-            <el-table-column label="R" width="30">
+            <el-table-column :label="$t('R')" width="30">
               <template v-slot="{row}">
                 <el-radio v-model="row.acl" label="r"></el-radio>
               </template>
             </el-table-column>
-            <el-table-column label="F" width="30">
+            <el-table-column :label="$t('F')" width="30">
               <template v-slot="{row}">
                 <el-radio v-model="row.acl" label="f"></el-radio>
               </template>
@@ -145,14 +145,6 @@ export default {
         this.mergeACLPermission(aclPerm, group.write);
       }
     },
-    loadAclsFromUCI(resolve, sid) {
-      const s = this.$uci.get('rpcd', sid);
-
-      resolve({
-        read: s.read || [],
-        write: s.write || []
-      });
-    },
     aclMatch(list, group) {
       if (list.indexOf('!' + group) > -1)
         return false;
@@ -262,7 +254,7 @@ export default {
       if (!window.oui.isEqual(writeList, originalWriteList))
         this.$uci.set('rpcd', sid, 'write', this.aclToUCI(writeList));
     },
-    onApply() {
+    onApplied() {
       this.$session.updateACLs();
     }
   }

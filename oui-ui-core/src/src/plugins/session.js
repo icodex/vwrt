@@ -1,6 +1,7 @@
 import {ubus} from './ubus'
+import {uci} from './uci'
 
-const DEFAULT_SESSION_ID	= '00000000000000000000000000000000'
+const DEFAULT_SESSION_ID = '00000000000000000000000000000000'
 
 export const session = {
   aclCache: null
@@ -43,6 +44,11 @@ session.access = function(scope, object, fun) {
   return new Promise(resolve => {
     if (this.sid() === DEFAULT_SESSION_ID) {
       resolve(false);
+      return;
+    }
+
+    if (uci.applying()) {
+      resolve(true);
       return;
     }
 

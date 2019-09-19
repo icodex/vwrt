@@ -182,7 +182,8 @@ export default {
         }
       }
 
-      teasers[teasers.length - 1].push('end');
+      if (teasers.length > 0)
+        teasers[teasers.length - 1].push('end');
 
       return teasers;
     },
@@ -220,6 +221,13 @@ export default {
       });
 
       return promises;
+    },
+    applied() {
+      this.sids.forEach(sid => {
+        for (const name in this.children) {
+          this.children[name].applied(sid);
+        }
+      });
     },
     handleSort(sid, up) {
       const sids = this.sids;
